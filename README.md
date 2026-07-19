@@ -10,6 +10,7 @@ It's a place to experiment, compare, and understand why frontend decisions are m
 
 ## Roadmap
 
+- [ ] Landing Page
 - [ ] Modal Playground
 - [ ] Toast Playground
 - [ ] Button Playground
