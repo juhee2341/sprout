@@ -33,7 +33,12 @@ src/
     ui/               shadcn/ui (직접 수정 금지)
     common/           재사용 범용 컴포넌트
     layout/           헤더·푸터 등 레이아웃 조각
-    <feature>/        기능별 컴포넌트 (예: landing/)
+    <feature>/        단순 프리젠테이션 컴포넌트 (예: landing/)
+  features/
+    <feature>/        자기완결형 기능 모듈 (예: modal/ 플레이그라운드)
+      components/     모듈 전용 컴포넌트
+      hooks/          모듈 전용 훅
+      <feature>.data.ts  모듈 정적 데이터
   hooks/
   lib/
     auth.ts           requireAuth() 등 인증 헬퍼
@@ -46,6 +51,10 @@ src/
 
 **파일명**: 컴포넌트 `PascalCase`, 그 외 `kebab-case`, 테스트는 co-located.
 예외 — `components/ui/`는 shadcn/ui 생성 관례를 따라 소문자(`button.tsx`) 유지.
+
+**`components/<feature>/` vs `features/<feature>/`**: 여러 페이지에서 재사용되는
+단순 컴포넌트는 `components/`, 자체 상태·훅·데이터를 가진 자기완결형 기능은
+`features/`. 훅·상수는 모듈 안에 co-locate 하고, 전역 공유 시에만 `hooks/`·`constants/`.
 
 ## Scripts
 
