@@ -1,4 +1,10 @@
-import { roadmap, type RoadmapStatus } from "@/constants/roadmap"
+import Link from "next/link"
+
+import {
+  roadmap,
+  type RoadmapItem,
+  type RoadmapStatus,
+} from "@/constants/roadmap"
 import { cn } from "@/lib/utils"
 
 const statusMeta: Record<
@@ -14,6 +20,53 @@ const statusMeta: Record<
   planned: { icon: "⬜", label: "예정", className: "text-muted-foreground" },
 }
 
+const rowBase =
+  "flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3"
+
+function RoadmapRow({ item }: { item: RoadmapItem }) {
+  const meta = statusMeta[item.status]
+
+  const content = (
+    <>
+      <span className="text-lg" aria-hidden>
+        {meta.icon}
+      </span>
+      <span className={cn("text-base font-medium", meta.className)}>
+        {item.label}
+      </span>
+      <span className="ml-auto text-xs text-muted-foreground">
+        {meta.label}
+      </span>
+      {item.href && (
+        <span
+          aria-hidden
+          className="text-muted-foreground transition-transform group-hover:translate-x-0.5"
+        >
+          →
+        </span>
+      )}
+    </>
+  )
+
+  if (!item.href) {
+    return <li className={rowBase}>{content}</li>
+  }
+
+  return (
+    <li>
+      <Link
+        href={item.href}
+        className={cn(
+          rowBase,
+          "group transition-colors hover:border-foreground/20 hover:bg-muted/50"
+        )}
+      >
+        {content}
+      </Link>
+    </li>
+  )
+}
+
 export function Roadmap() {
   return (
     <section id="roadmap" className="px-6 py-20">
@@ -24,25 +77,9 @@ export function Roadmap() {
         </div>
 
         <ul className="flex flex-col gap-2">
-          {roadmap.map((item) => {
-            const meta = statusMeta[item.status]
-            return (
-              <li
-                key={item.label}
-                className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3"
-              >
-                <span className="text-lg" aria-hidden>
-                  {meta.icon}
-                </span>
-                <span className={cn("text-base font-medium", meta.className)}>
-                  {item.label}
-                </span>
-                <span className="ml-auto text-xs text-muted-foreground">
-                  {meta.label}
-                </span>
-              </li>
-            )
-          })}
+          {roadmap.map((item) => (
+            <RoadmapRow key={item.label} item={item} />
+          ))}
         </ul>
       </div>
     </section>
