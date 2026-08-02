@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 생성물 — 린트 대상 아님
+    "coverage/**",
   ]),
 ]);
 
