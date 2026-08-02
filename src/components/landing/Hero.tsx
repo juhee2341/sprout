@@ -14,14 +14,13 @@ export function Hero() {
           Sprout
         </h1>
         <p className="max-w-xl text-lg leading-8 text-muted-foreground">
-          A frontend playground for exploring UI components and engineering
-          decisions.
+          UI 컴포넌트와 엔지니어링 결정을 탐구하는 프론트엔드 플레이그라운드.
         </p>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <Button asChild size="lg" className="h-11 px-6 text-base">
-          <a href="#roadmap">Explore</a>
+          <a href="#roadmap">둘러보기</a>
         </Button>
         <Button
           asChild

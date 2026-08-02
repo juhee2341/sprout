@@ -1,7 +1,7 @@
-import { Hero } from "@/components/landing/hero"
-import { Why } from "@/components/landing/why"
-import { Roadmap } from "@/components/landing/roadmap"
-import { Footer } from "@/components/landing/footer"
+import { Hero } from "@/components/landing/Hero"
+import { Why } from "@/components/landing/Why"
+import { Roadmap } from "@/components/landing/Roadmap"
+import { Footer } from "@/components/landing/Footer"
 
 export default function Home() {
   return (

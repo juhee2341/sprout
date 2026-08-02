@@ -9,9 +9,9 @@ export interface RoadmapItem {
  * Current progress of Sprout. To advance an item, just change its `status`.
  */
 export const roadmap: RoadmapItem[] = [
-  { label: "Project Init", status: "done" },
-  { label: "Landing Page", status: "in-progress" },
-  { label: "Modal Playground", status: "planned" },
-  { label: "Toast Playground", status: "planned" },
-  { label: "Decision Log", status: "planned" },
+  { label: "프로젝트 초기 설정", status: "done" },
+  { label: "랜딩 페이지", status: "in-progress" },
+  { label: "모달 플레이그라운드", status: "planned" },
+  { label: "토스트 플레이그라운드", status: "planned" },
+  { label: "결정 로그", status: "planned" },
 ]

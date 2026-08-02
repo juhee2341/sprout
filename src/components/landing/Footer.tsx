@@ -7,7 +7,7 @@ export function Footer() {
     <footer className="border-t border-border px-6 py-10">
       <div className="mx-auto flex max-w-4xl flex-col items-center gap-3 text-sm text-muted-foreground sm:flex-row sm:justify-between">
         <p>
-          Built with{" "}
+          제작 기술:{" "}
           {stack.map((tech, i) => (
             <span key={tech}>
               <span className="font-medium text-foreground">{tech}</span>
