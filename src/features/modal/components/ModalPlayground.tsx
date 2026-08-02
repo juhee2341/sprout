@@ -5,7 +5,7 @@ import { ModalControls } from "./ModalControls"
 import { ModalPreview } from "./ModalPreview"
 
 export function ModalPlayground() {
-  const { state, toggle } = useModalPlayground()
+  const { state, toggle, set } = useModalPlayground()
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-10 px-6 py-16">
@@ -23,7 +23,7 @@ export function ModalPlayground() {
 
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-medium text-muted-foreground">Controls</h2>
-        <ModalControls state={state} onToggle={toggle} />
+        <ModalControls state={state} onToggle={toggle} onChange={set} />
       </section>
     </div>
   )

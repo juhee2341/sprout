@@ -3,12 +3,23 @@
 import { Dialog } from "radix-ui"
 
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
-import type { ModalPlaygroundState } from "../hooks/useModalPlayground"
+import type {
+  ModalPlaygroundState,
+  ModalSize,
+} from "../hooks/useModalPlayground"
+
+const sizeClass: Record<ModalSize, string> = {
+  sm: "max-w-sm",
+  md: "max-w-md",
+  lg: "max-w-lg",
+  full: "max-w-[calc(100vw-2rem)]",
+}
 
 /**
  * 실제 Radix Dialog 를 여는 미리보기. 더미가 아니라 진짜 focus trap·portal 이
- * 동작하며, Controls 의 토글이 닫기 동작을 실시간으로 바꾼다.
+ * 동작하며, Controls 의 설정이 닫기 동작·크기·내용·푸터를 실시간으로 바꾼다.
  */
 export function ModalPreview({ state }: { state: ModalPlaygroundState }) {
   return (
@@ -30,23 +41,30 @@ export function ModalPreview({ state }: { state: ModalPlaygroundState }) {
           onPointerDownOutside={(event) => {
             if (!state.overlayClose) event.preventDefault()
           }}
-          className="fixed top-1/2 left-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-card p-6 shadow-lg focus:outline-none"
+          className={cn(
+            "fixed top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-card p-6 shadow-lg focus:outline-none",
+            sizeClass[state.size]
+          )}
         >
           <Dialog.Title className="text-lg font-semibold">
-            Are you sure?
+            {state.title}
           </Dialog.Title>
           <Dialog.Description className="mt-2 text-sm text-muted-foreground">
-            This action cannot be undone.
+            {state.description}
           </Dialog.Description>
 
-          <div className="mt-6 flex justify-end gap-2">
-            <Dialog.Close asChild>
-              <Button variant="outline">Cancel</Button>
-            </Dialog.Close>
-            <Dialog.Close asChild>
-              <Button>Confirm</Button>
-            </Dialog.Close>
-          </div>
+          {state.footer !== "none" && (
+            <div className="mt-6 flex justify-end gap-2">
+              {state.footer === "default" && (
+                <Dialog.Close asChild>
+                  <Button variant="outline">{state.cancelText}</Button>
+                </Dialog.Close>
+              )}
+              <Dialog.Close asChild>
+                <Button>{state.confirmText}</Button>
+              </Dialog.Close>
+            </div>
+          )}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
