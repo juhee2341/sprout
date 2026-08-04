@@ -27,7 +27,7 @@ export function ModalPreview({ state }: { state: ModalPlaygroundState }) {
       <div className="flex min-h-64 items-center justify-center rounded-xl border border-border bg-card">
         <Dialog.Trigger asChild>
           <Button size="lg" className="h-11 px-6 text-base">
-            Open Modal
+            모달 열기
           </Button>
         </Dialog.Trigger>
       </div>

@@ -11,13 +11,8 @@ import type {
   ModalSize,
   ModalToggleKey,
 } from "../hooks/useModalPlayground"
-import {
-  footerOptions,
-  learningNotes,
-  sizeOptions,
-  toggleControls,
-  type LearningNote,
-} from "../modal.data"
+import { footerOptions, sizeOptions, toggleControls } from "../modal.data"
+import { DecisionGuide } from "./DecisionGuide"
 
 interface ModalControlsProps {
   state: ModalPlaygroundState
@@ -28,25 +23,11 @@ interface ModalControlsProps {
   ) => void
 }
 
-function LearningNotes({ notes }: { notes?: LearningNote[] }) {
-  if (!notes?.length) return null
-
-  return (
-    <ul className="mt-2.5 flex flex-col gap-1">
-      {notes.map((note) => (
-        <li
-          key={note.text}
-          className="flex gap-1.5 text-xs leading-relaxed text-muted-foreground"
-        >
-          <span aria-hidden>{note.tone === "tip" ? "💡" : "⚠️"}</span>
-          <span>{note.text}</span>
-        </li>
-      ))}
-    </ul>
-  )
-}
-
 export function ModalControls({ state, onToggle, onChange }: ModalControlsProps) {
+  const sizeLabel = sizeOptions.find((o) => o.value === state.size)?.label ?? ""
+  const footerLabel =
+    footerOptions.find((o) => o.value === state.footer)?.label ?? ""
+
   return (
     <div className="flex flex-col divide-y divide-border rounded-xl border border-border">
       {/* Overlay Click / ESC Close */}
@@ -72,7 +53,7 @@ export function ModalControls({ state, onToggle, onChange }: ModalControlsProps)
                 onCheckedChange={() => onToggle(control.key)}
               />
             </div>
-            <LearningNotes notes={learningNotes[control.key]} />
+            <DecisionGuide decisionKey={control.key} label={control.label} />
           </div>
         )
       })}
@@ -97,7 +78,10 @@ export function ModalControls({ state, onToggle, onChange }: ModalControlsProps)
             )
           })}
         </RadioGroup>
-        <LearningNotes notes={learningNotes.size} />
+        <DecisionGuide
+          decisionKey={`size:${state.size}`}
+          label={`Size — ${sizeLabel}`}
+        />
       </div>
 
       {/* Title / Description */}
@@ -107,7 +91,7 @@ export function ModalControls({ state, onToggle, onChange }: ModalControlsProps)
           <Input
             id="modal-title"
             value={state.title}
-            placeholder="Delete account"
+            placeholder="타이틀 영역이에요"
             onChange={(event) => onChange("title", event.target.value)}
           />
         </div>
@@ -116,11 +100,11 @@ export function ModalControls({ state, onToggle, onChange }: ModalControlsProps)
           <Input
             id="modal-description"
             value={state.description}
-            placeholder="This action cannot be undone."
+            placeholder="디스크립션 영역이에요"
             onChange={(event) => onChange("description", event.target.value)}
           />
         </div>
-        <LearningNotes notes={learningNotes.content} />
+        <DecisionGuide decisionKey="content" label="Title·Description" />
       </div>
 
       {/* Footer */}
@@ -143,7 +127,10 @@ export function ModalControls({ state, onToggle, onChange }: ModalControlsProps)
             )
           })}
         </RadioGroup>
-        <LearningNotes notes={learningNotes.footer} />
+        <DecisionGuide
+          decisionKey={`footer:${state.footer}`}
+          label={`Footer — ${footerLabel}`}
+        />
       </div>
 
       {/* Button Text — footer 가 있을 때만 */}
@@ -167,7 +154,7 @@ export function ModalControls({ state, onToggle, onChange }: ModalControlsProps)
               />
             </div>
           )}
-          <LearningNotes notes={learningNotes.buttons} />
+          <DecisionGuide decisionKey="buttons" label="Button Text" />
         </div>
       )}
     </div>

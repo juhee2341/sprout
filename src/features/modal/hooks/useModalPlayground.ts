@@ -29,11 +29,11 @@ export const initialModalState: ModalPlaygroundState = {
   overlayClose: true,
   escClose: true,
   size: "md",
-  title: "Delete account",
-  description: "This action cannot be undone.",
+  title: "타이틀 영역이에요",
+  description: "디스크립션 영역이에요",
   footer: "default",
-  confirmText: "Confirm",
-  cancelText: "Cancel",
+  confirmText: "확인",
+  cancelText: "취소",
 }
 
 /**
