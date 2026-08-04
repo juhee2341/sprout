@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@/test-utils/render"
 
 import { initialModalState } from "../hooks/useModalPlayground"
+import { decisionGuides } from "../modal.data"
 import { ModalControls } from "./ModalControls"
 
 const noop = () => {}
@@ -79,6 +80,27 @@ describe("ModalControls", () => {
 
     expect(screen.queryByLabelText("Confirm Text")).not.toBeInTheDocument()
     expect(screen.queryByLabelText("Cancel Text")).not.toBeInTheDocument()
+  })
+
+  it("고른 Size 값에 맞는 판단 근거를 보여준다", async () => {
+    const { user } = render(
+      <ModalControls
+        state={{ ...initialModalState, size: "full" }}
+        onToggle={noop}
+        onChange={noop}
+      />
+    )
+
+    await user.click(
+      screen.getByRole("button", { name: /왜 이 선택을 하나요.*Size — Full/ })
+    )
+
+    expect(
+      screen.getByText(decisionGuides["size:full"].why)
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText(decisionGuides["size:md"].why)
+    ).not.toBeInTheDocument()
   })
 
   it("Footer 가 custom 이면 Confirm 만, Cancel 은 숨긴다", () => {

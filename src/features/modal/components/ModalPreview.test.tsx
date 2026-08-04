@@ -4,12 +4,12 @@ import { initialModalState } from "../hooks/useModalPlayground"
 import { ModalPreview } from "./ModalPreview"
 
 async function openModal(user: ReturnType<typeof render>["user"]) {
-  await user.click(screen.getByRole("button", { name: "Open Modal" }))
+  await user.click(screen.getByRole("button", { name: "모달 열기" }))
   return screen.findByRole("dialog")
 }
 
 describe("ModalPreview", () => {
-  it("Open Modal 을 누르면 title·description 을 담은 다이얼로그가 열린다", async () => {
+  it("모달 열기 를 누르면 title·description 을 담은 다이얼로그가 열린다", async () => {
     const { user } = render(
       <ModalPreview
         state={{ ...initialModalState, title: "Remove item" }}
