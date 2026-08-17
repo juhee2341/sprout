@@ -15,9 +15,13 @@ export const roadmap: RoadmapItem[] = [
   { label: "랜딩 페이지", status: "done" },
   {
     label: "모달 플레이그라운드",
-    status: "in-progress",
+    status: "done",
     href: "/components/modal",
   },
-  { label: "토스트 플레이그라운드", status: "planned" },
+  {
+    label: "토스트 플레이그라운드",
+    status: "in-progress",
+    href: "/components/toast",
+  },
   { label: "결정 로그", status: "planned" },
 ]
