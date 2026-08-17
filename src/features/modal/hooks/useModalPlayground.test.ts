@@ -27,4 +27,22 @@ describe("useModalPlayground", () => {
     expect(result.current.state.size).toBe("lg")
     expect(result.current.state.title).toBe("Remove item")
   })
+
+  it("취소 버튼이 사라지는 footer 로 바꾸면 초기 포커스를 auto 로 되돌린다", () => {
+    const { result } = renderHook(() => useModalPlayground())
+
+    act(() => result.current.set("initialFocus", "cancel"))
+    act(() => result.current.set("footer", "single"))
+
+    expect(result.current.state.initialFocus).toBe("auto")
+  })
+
+  it("버튼이 그대로 있는 footer 변경은 초기 포커스를 건드리지 않는다", () => {
+    const { result } = renderHook(() => useModalPlayground())
+
+    act(() => result.current.set("initialFocus", "cancel"))
+    act(() => result.current.set("footer", "custom"))
+
+    expect(result.current.state.initialFocus).toBe("cancel")
+  })
 })

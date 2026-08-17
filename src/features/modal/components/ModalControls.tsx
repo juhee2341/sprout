@@ -1,17 +1,38 @@
 "use client"
 
+import { useId } from "react"
+
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
 
-import type {
-  ModalFooter,
-  ModalPlaygroundState,
-  ModalSize,
-  ModalToggleKey,
+import {
+  hasCancelButton,
+  hasConfirmButton,
+  type ButtonOrder,
+  type ConfirmTone,
+  type FooterLayout,
+  type InitialFocus,
+  type ModalFooter,
+  type ModalPlaygroundState,
+  type ModalSize,
+  type ModalToggleKey,
 } from "../hooks/useModalPlayground"
-import { footerOptions, sizeOptions, toggleControls } from "../modal.data"
+import {
+  buttonOrderOptions,
+  closeControls,
+  confirmToneOptions,
+  footerLayoutOptions,
+  footerOptions,
+  initialFocusOptions,
+  loadingControl,
+  longContentControl,
+  sizeOptions,
+  type DecisionKey,
+  type SelectOption,
+  type ToggleControl,
+} from "../modal.data"
 import { DecisionGuide } from "./DecisionGuide"
 
 interface ModalControlsProps {
@@ -23,65 +44,124 @@ interface ModalControlsProps {
   ) => void
 }
 
+function ToggleRow({
+  control,
+  checked,
+  onToggle,
+}: {
+  control: ToggleControl
+  checked: boolean
+  onToggle: (key: ModalToggleKey) => void
+}) {
+  const switchId = `control-${control.key}`
+  const labelId = `${switchId}-label`
+
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-0.5">
+        <Label id={labelId} htmlFor={switchId}>
+          {control.label}
+        </Label>
+        <span className="text-xs text-muted-foreground">
+          {control.description}
+        </span>
+      </div>
+      <Switch
+        id={switchId}
+        aria-labelledby={labelId}
+        checked={checked}
+        onCheckedChange={() => onToggle(control.key)}
+      />
+    </div>
+  )
+}
+
+function RadioField<T extends string>({
+  name,
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  name: string
+  label: string
+  value: T
+  options: SelectOption<T>[]
+  onChange: (value: T) => void
+}) {
+  const labelId = useId()
+
+  return (
+    <div>
+      <span id={labelId} className="text-sm font-medium">
+        {label}
+      </span>
+      <RadioGroup
+        aria-labelledby={labelId}
+        className="mt-2 flex flex-wrap gap-4"
+        value={value}
+        onValueChange={(next) => onChange(next as T)}
+      >
+        {options.map((option) => {
+          const id = `${name}-${option.value}`
+          return (
+            <div key={option.value} className="flex items-center gap-2">
+              <RadioGroupItem id={id} value={option.value} />
+              <Label htmlFor={id} className="font-normal">
+                {option.label}
+              </Label>
+            </div>
+          )
+        })}
+      </RadioGroup>
+    </div>
+  )
+}
+
+function labelOf<T extends string>(options: SelectOption<T>[], value: T) {
+  return options.find((option) => option.value === value)?.label ?? ""
+}
+
 export function ModalControls({ state, onToggle, onChange }: ModalControlsProps) {
-  const sizeLabel = sizeOptions.find((o) => o.value === state.size)?.label ?? ""
-  const footerLabel =
-    footerOptions.find((o) => o.value === state.footer)?.label ?? ""
+  const showConfirm = hasConfirmButton(state)
+  const showCancel = hasCancelButton(state)
+  const isCustomFooter = state.footer === "custom"
+
+  /** 초기 포커스는 실제로 존재하는 버튼만 고를 수 있다 */
+  const focusOptions = initialFocusOptions.filter((option) => {
+    if (option.value === "confirm") return showConfirm
+    if (option.value === "cancel") return showCancel
+    return true
+  })
+
+  const guide = (decisionKey: DecisionKey, label: string) => (
+    <DecisionGuide decisionKey={decisionKey} label={label} />
+  )
 
   return (
     <div className="flex flex-col divide-y divide-border rounded-xl border border-border">
-      {/* Overlay Click / ESC Close */}
-      {toggleControls.map((control) => {
-        const switchId = `control-${control.key}`
-        const labelId = `${switchId}-label`
-
-        return (
-          <div key={control.key} className="px-4 py-3">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex flex-col gap-0.5">
-                <Label id={labelId} htmlFor={switchId}>
-                  {control.label}
-                </Label>
-                <span className="text-xs text-muted-foreground">
-                  {control.description}
-                </span>
-              </div>
-              <Switch
-                id={switchId}
-                aria-labelledby={labelId}
-                checked={state[control.key]}
-                onCheckedChange={() => onToggle(control.key)}
-              />
-            </div>
-            <DecisionGuide decisionKey={control.key} label={control.label} />
-          </div>
-        )
-      })}
+      {/* Overlay Click / ESC Close / Close Button */}
+      {closeControls.map((control) => (
+        <div key={control.key} className="px-4 py-3">
+          <ToggleRow
+            control={control}
+            checked={state[control.key]}
+            onToggle={onToggle}
+          />
+          {guide(control.key, control.label)}
+        </div>
+      ))}
 
       {/* Size */}
       <div className="px-4 py-3">
-        <span className="text-sm font-medium">Size</span>
-        <RadioGroup
-          className="mt-2 flex flex-wrap gap-4"
+        <RadioField
+          name="size"
+          label="Size"
           value={state.size}
-          onValueChange={(value) => onChange("size", value as ModalSize)}
-        >
-          {sizeOptions.map((option) => {
-            const id = `size-${option.value}`
-            return (
-              <div key={option.value} className="flex items-center gap-2">
-                <RadioGroupItem id={id} value={option.value} />
-                <Label htmlFor={id} className="font-normal">
-                  {option.label}
-                </Label>
-              </div>
-            )
-          })}
-        </RadioGroup>
-        <DecisionGuide
-          decisionKey={`size:${state.size}`}
-          label={`Size — ${sizeLabel}`}
+          options={sizeOptions}
+          onChange={(value: ModalSize) => onChange("size", value)}
         />
+        {guide(`size:${state.size}`, `Size — ${labelOf(sizeOptions, state.size)}`)}
       </div>
 
       {/* Title / Description */}
@@ -104,37 +184,90 @@ export function ModalControls({ state, onToggle, onChange }: ModalControlsProps)
             onChange={(event) => onChange("description", event.target.value)}
           />
         </div>
-        <DecisionGuide decisionKey="content" label="Title·Description" />
+        {guide("content", "Title·Description")}
+      </div>
+
+      {/* Long Content */}
+      <div className="px-4 py-3">
+        <ToggleRow
+          control={longContentControl}
+          checked={state.longContent}
+          onToggle={onToggle}
+        />
+        {guide("longContent", longContentControl.label)}
       </div>
 
       {/* Footer */}
       <div className="px-4 py-3">
-        <span className="text-sm font-medium">Footer</span>
-        <RadioGroup
-          className="mt-2 flex flex-wrap gap-4"
+        <RadioField
+          name="footer"
+          label="Footer"
           value={state.footer}
-          onValueChange={(value) => onChange("footer", value as ModalFooter)}
-        >
-          {footerOptions.map((option) => {
-            const id = `footer-${option.value}`
-            return (
-              <div key={option.value} className="flex items-center gap-2">
-                <RadioGroupItem id={id} value={option.value} />
-                <Label htmlFor={id} className="font-normal">
-                  {option.label}
-                </Label>
-              </div>
-            )
-          })}
-        </RadioGroup>
-        <DecisionGuide
-          decisionKey={`footer:${state.footer}`}
-          label={`Footer — ${footerLabel}`}
+          options={footerOptions}
+          onChange={(value: ModalFooter) => onChange("footer", value)}
         />
+        {guide(
+          `footer:${state.footer}`,
+          `Footer — ${labelOf(footerOptions, state.footer)}`
+        )}
       </div>
 
-      {/* Button Text — footer 가 있을 때만 */}
-      {state.footer !== "none" && (
+      {/* Button Layout — 푸터 버튼을 직접 배치하는 Custom 에는 해당 없음 */}
+      {showConfirm && !isCustomFooter && (
+        <div className="px-4 py-3">
+          <RadioField
+            name="layout"
+            label="Button Layout"
+            value={state.footerLayout}
+            options={footerLayoutOptions}
+            onChange={(value: FooterLayout) => onChange("footerLayout", value)}
+          />
+          {guide("layout", "Button Layout")}
+        </div>
+      )}
+
+      {/* Button Order — 버튼이 둘일 때만 의미가 있음 */}
+      {showCancel && (
+        <div className="px-4 py-3">
+          <RadioField
+            name="order"
+            label="Button Order"
+            value={state.buttonOrder}
+            options={buttonOrderOptions}
+            onChange={(value: ButtonOrder) => onChange("buttonOrder", value)}
+          />
+          {guide("order", "Button Order")}
+        </div>
+      )}
+
+      {/* Confirm Tone */}
+      {showConfirm && (
+        <div className="px-4 py-3">
+          <RadioField
+            name="tone"
+            label="Confirm Tone"
+            value={state.confirmTone}
+            options={confirmToneOptions}
+            onChange={(value: ConfirmTone) => onChange("confirmTone", value)}
+          />
+          {guide("tone", "Confirm Tone")}
+        </div>
+      )}
+
+      {/* Initial Focus */}
+      <div className="px-4 py-3">
+        <RadioField
+          name="focus"
+          label="Initial Focus"
+          value={state.initialFocus}
+          options={focusOptions}
+          onChange={(value: InitialFocus) => onChange("initialFocus", value)}
+        />
+        {guide("focus", "Initial Focus")}
+      </div>
+
+      {/* Button Text / Loading — footer 가 있을 때만 */}
+      {showConfirm && (
         <div className="flex flex-col gap-3 px-4 py-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="confirm-text">Confirm Text</Label>
@@ -144,7 +277,7 @@ export function ModalControls({ state, onToggle, onChange }: ModalControlsProps)
               onChange={(event) => onChange("confirmText", event.target.value)}
             />
           </div>
-          {state.footer === "default" && (
+          {showCancel && (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="cancel-text">Cancel Text</Label>
               <Input
@@ -154,7 +287,16 @@ export function ModalControls({ state, onToggle, onChange }: ModalControlsProps)
               />
             </div>
           )}
-          <DecisionGuide decisionKey="buttons" label="Button Text" />
+          {guide("buttons", "Button Text")}
+
+          <div className="border-t border-border pt-3">
+            <ToggleRow
+              control={loadingControl}
+              checked={state.loading}
+              onToggle={onToggle}
+            />
+            {guide("loading", loadingControl.label)}
+          </div>
         </div>
       )}
     </div>
