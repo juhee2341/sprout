@@ -103,7 +103,7 @@ describe("ModalControls", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("Footer 가 custom 이면 Confirm 만, Cancel 은 숨긴다", () => {
+  it("Footer 가 custom 이면 두 버튼 문구를 모두 편집할 수 있다", () => {
     render(
       <ModalControls
         state={{ ...initialModalState, footer: "custom" }}
@@ -113,6 +113,110 @@ describe("ModalControls", () => {
     )
 
     expect(screen.getByLabelText("Confirm Text")).toBeInTheDocument()
+    expect(screen.getByLabelText("Cancel Text")).toBeInTheDocument()
+  })
+
+  it("Footer 가 single 이면 Cancel 문구와 Button Order 를 숨긴다", () => {
+    render(
+      <ModalControls
+        state={{ ...initialModalState, footer: "single" }}
+        onToggle={noop}
+        onChange={noop}
+      />
+    )
+
+    expect(screen.getByLabelText("Confirm Text")).toBeInTheDocument()
     expect(screen.queryByLabelText("Cancel Text")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("radiogroup", { name: "Button Order" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("Close Button 스위치를 누르면 onToggle('closeButton') 을 호출한다", async () => {
+    const onToggle = jest.fn()
+    const { user } = render(
+      <ModalControls
+        state={initialModalState}
+        onToggle={onToggle}
+        onChange={noop}
+      />
+    )
+
+    await user.click(screen.getByRole("switch", { name: "Close Button" }))
+
+    expect(onToggle).toHaveBeenCalledWith("closeButton")
+  })
+
+  it("Button Order 를 고르면 onChange('buttonOrder', ...) 를 호출한다", async () => {
+    const onChange = jest.fn()
+    const { user } = render(
+      <ModalControls
+        state={initialModalState}
+        onToggle={noop}
+        onChange={onChange}
+      />
+    )
+
+    await user.click(screen.getByRole("radio", { name: "확인 먼저" }))
+
+    expect(onChange).toHaveBeenCalledWith("buttonOrder", "confirmFirst")
+  })
+
+  it("Initial Focus 는 실제로 존재하는 버튼만 선택지로 준다", () => {
+    const { rerender } = render(
+      <ModalControls
+        state={initialModalState}
+        onToggle={noop}
+        onChange={noop}
+      />
+    )
+
+    expect(screen.getByRole("radio", { name: "취소 버튼" })).toBeInTheDocument()
+
+    rerender(
+      <ModalControls
+        state={{ ...initialModalState, footer: "single" }}
+        onToggle={noop}
+        onChange={noop}
+      />
+    )
+
+    expect(
+      screen.queryByRole("radio", { name: "취소 버튼" })
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole("radio", { name: "확인 버튼" })).toBeInTheDocument()
+  })
+
+  it("Footer 가 none 이면 버튼 관련 컨트롤을 모두 숨긴다", () => {
+    render(
+      <ModalControls
+        state={{ ...initialModalState, footer: "none" }}
+        onToggle={noop}
+        onChange={noop}
+      />
+    )
+
+    expect(
+      screen.queryByRole("radiogroup", { name: "Confirm Tone" })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("radiogroup", { name: "Button Layout" })
+    ).not.toBeInTheDocument()
+    expect(screen.queryByRole("switch", { name: "Loading" })).not.toBeInTheDocument()
+  })
+
+  it("Long Content 토글은 콘텐츠 그룹에서 조작할 수 있다", async () => {
+    const onToggle = jest.fn()
+    const { user } = render(
+      <ModalControls
+        state={initialModalState}
+        onToggle={onToggle}
+        onChange={noop}
+      />
+    )
+
+    await user.click(screen.getByRole("switch", { name: "Long Content" }))
+
+    expect(onToggle).toHaveBeenCalledWith("longContent")
   })
 })
