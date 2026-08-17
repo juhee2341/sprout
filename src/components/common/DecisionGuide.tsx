@@ -4,8 +4,7 @@ import { ChevronDown } from "lucide-react"
 import { useId, useState } from "react"
 
 import { cn } from "@/lib/utils"
-
-import { decisionGuides, type DecisionKey, type DecisionGuide } from "../modal.data"
+import type { DecisionGuide as Guide } from "@/types/decision"
 
 function Section({
   icon,
@@ -44,7 +43,7 @@ function Bullets({ items }: { items: string[] }) {
   )
 }
 
-function GuideBody({ guide }: { guide: DecisionGuide }) {
+function GuideBody({ guide }: { guide: Guide }) {
   return (
     <div className="flex flex-col gap-3 rounded-lg bg-muted/40 p-3">
       <Section icon="📖" title="무엇을 정하나">
@@ -106,15 +105,15 @@ function GuideBody({ guide }: { guide: DecisionGuide }) {
  * "왜 이걸 고르지?"가 떠오른 순간에만 열리게 한다.
  */
 export function DecisionGuide({
-  decisionKey,
+  guide,
   label,
 }: {
-  decisionKey: DecisionKey
+  guide: Guide
+  /** 같은 문구의 토글이 여러 개라 스크린 리더용으로 어느 옵션인지 덧붙인다 */
   label: string
 }) {
   const [open, setOpen] = useState(false)
   const panelId = useId()
-  const guide = decisionGuides[decisionKey]
 
   return (
     <div className="mt-2.5">

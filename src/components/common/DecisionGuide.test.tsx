@@ -1,11 +1,11 @@
 import { render, screen } from "@/test-utils/render"
 
-import { decisionGuides } from "../modal.data"
+import { decisionGuides } from "@/features/modal/modal.data"
 import { DecisionGuide } from "./DecisionGuide"
 
 describe("DecisionGuide", () => {
   it("기본은 접힌 상태로 렌더한다", () => {
-    render(<DecisionGuide decisionKey="overlayClose" label="Overlay Click" />)
+    render(<DecisionGuide guide={decisionGuides["overlayClose"]} label="Overlay Click" />)
 
     const trigger = screen.getByRole("button", { name: /왜 이 선택을 하나요/ })
 
@@ -17,7 +17,7 @@ describe("DecisionGuide", () => {
 
   it("펼치면 해당 옵션의 판단 근거를 보여준다", async () => {
     const { user } = render(
-      <DecisionGuide decisionKey="overlayClose" label="Overlay Click" />
+      <DecisionGuide guide={decisionGuides["overlayClose"]} label="Overlay Click" />
     )
 
     await user.click(screen.getByRole("button", { name: /왜 이 선택을 하나요/ }))
@@ -36,7 +36,7 @@ describe("DecisionGuide", () => {
 
   it("근거가 있으면 출처 링크를 새 탭으로 연다", async () => {
     const { user } = render(
-      <DecisionGuide decisionKey="escClose" label="ESC Close" />
+      <DecisionGuide guide={decisionGuides["escClose"]} label="ESC Close" />
     )
 
     await user.click(screen.getByRole("button", { name: /왜 이 선택을 하나요/ }))
@@ -53,7 +53,7 @@ describe("DecisionGuide", () => {
 
   it("근거가 없는 옵션은 근거 섹션을 렌더하지 않는다", async () => {
     const { user } = render(
-      <DecisionGuide decisionKey="size:sm" label="Size — Small" />
+      <DecisionGuide guide={decisionGuides["size:sm"]} label="Size — Small" />
     )
 
     await user.click(screen.getByRole("button", { name: /왜 이 선택을 하나요/ }))
@@ -65,7 +65,7 @@ describe("DecisionGuide", () => {
 
   it("aria-controls 가 실제 패널을 가리킨다", async () => {
     const { user } = render(
-      <DecisionGuide decisionKey="content" label="Title·Description" />
+      <DecisionGuide guide={decisionGuides["content"]} label="Title·Description" />
     )
 
     const trigger = screen.getByRole("button", { name: /왜 이 선택을 하나요/ })

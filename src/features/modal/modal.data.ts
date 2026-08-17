@@ -1,3 +1,6 @@
+import type { SelectOption, ToggleControl } from "@/types/control"
+import type { DecisionGuide } from "@/types/decision"
+
 import type {
   ButtonOrder,
   ConfirmTone,
@@ -8,14 +11,8 @@ import type {
   ModalToggleKey,
 } from "./hooks/useModalPlayground"
 
-export interface ToggleControl {
-  key: ModalToggleKey
-  label: string
-  description: string
-}
-
 /** 모달을 "어떻게 닫을 수 있는가"를 정하는 토글 묶음 */
-export const closeControls: ToggleControl[] = [
+export const closeControls: ToggleControl<ModalToggleKey>[] = [
   {
     key: "overlayClose",
     label: "Overlay Click",
@@ -33,21 +30,16 @@ export const closeControls: ToggleControl[] = [
   },
 ]
 
-export const longContentControl: ToggleControl = {
+export const longContentControl: ToggleControl<ModalToggleKey> = {
   key: "longContent",
   label: "Long Content",
   description: "본문을 스크롤이 생길 만큼 길게 채웁니다.",
 }
 
-export const loadingControl: ToggleControl = {
+export const loadingControl: ToggleControl<ModalToggleKey> = {
   key: "loading",
   label: "Loading",
   description: "확인 버튼을 처리 중 상태로 둡니다.",
-}
-
-export interface SelectOption<T extends string> {
-  value: T
-  label: string
 }
 
 export const sizeOptions: SelectOption<ModalSize>[] = [
@@ -85,36 +77,6 @@ export const initialFocusOptions: SelectOption<InitialFocus>[] = [
   { value: "confirm", label: "확인 버튼" },
   { value: "cancel", label: "취소 버튼" },
 ]
-
-/**
- * 하나의 선택지를 "어느 쪽이 정답인가"가 아니라
- * "어떤 상황에서 어떤 대가를 치르는가"로 설명하는 단위.
- */
-export interface DecisionGuide {
-  /** 이 옵션이 무엇을 정하는지 한 줄로 */
-  summary: string
-  /** 이 선택이 자주 쓰이는 상황 */
-  fits: string[]
-  /** 신중하게 고려해야 하는 상황 */
-  careful: string[]
-  /** 양쪽 방향이 각각 무엇을 얻고 무엇을 내주는지 */
-  tradeOffs: TradeOff[]
-  /** 겉으로 드러나지 않는 판단 근거 — 이 Playground 의 핵심 */
-  why: string
-  /** 인용 가능한 1차 출처. 추측은 넣지 않는다. */
-  evidence?: Evidence[]
-}
-
-export interface TradeOff {
-  label: string
-  points: string[]
-}
-
-export interface Evidence {
-  source: string
-  detail: string
-  url: string
-}
 
 const APG_DIALOG = "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/"
 const BOOTSTRAP_MODAL = "https://getbootstrap.com/docs/5.3/components/modal/#options"

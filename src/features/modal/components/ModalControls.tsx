@@ -1,11 +1,13 @@
 "use client"
 
-import { useId } from "react"
-
+import {
+  labelOf,
+  RadioField,
+  ToggleRow,
+} from "@/components/common/ControlField"
+import { DecisionGuide } from "@/components/common/DecisionGuide"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Switch } from "@/components/ui/switch"
 
 import {
   hasCancelButton,
@@ -23,6 +25,7 @@ import {
   buttonOrderOptions,
   closeControls,
   confirmToneOptions,
+  decisionGuides,
   footerLayoutOptions,
   footerOptions,
   initialFocusOptions,
@@ -30,10 +33,7 @@ import {
   longContentControl,
   sizeOptions,
   type DecisionKey,
-  type SelectOption,
-  type ToggleControl,
 } from "../modal.data"
-import { DecisionGuide } from "./DecisionGuide"
 
 interface ModalControlsProps {
   state: ModalPlaygroundState
@@ -42,84 +42,6 @@ interface ModalControlsProps {
     key: K,
     value: ModalPlaygroundState[K]
   ) => void
-}
-
-function ToggleRow({
-  control,
-  checked,
-  onToggle,
-}: {
-  control: ToggleControl
-  checked: boolean
-  onToggle: (key: ModalToggleKey) => void
-}) {
-  const switchId = `control-${control.key}`
-  const labelId = `${switchId}-label`
-
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <div className="flex flex-col gap-0.5">
-        <Label id={labelId} htmlFor={switchId}>
-          {control.label}
-        </Label>
-        <span className="text-xs text-muted-foreground">
-          {control.description}
-        </span>
-      </div>
-      <Switch
-        id={switchId}
-        aria-labelledby={labelId}
-        checked={checked}
-        onCheckedChange={() => onToggle(control.key)}
-      />
-    </div>
-  )
-}
-
-function RadioField<T extends string>({
-  name,
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  name: string
-  label: string
-  value: T
-  options: SelectOption<T>[]
-  onChange: (value: T) => void
-}) {
-  const labelId = useId()
-
-  return (
-    <div>
-      <span id={labelId} className="text-sm font-medium">
-        {label}
-      </span>
-      <RadioGroup
-        aria-labelledby={labelId}
-        className="mt-2 flex flex-wrap gap-4"
-        value={value}
-        onValueChange={(next) => onChange(next as T)}
-      >
-        {options.map((option) => {
-          const id = `${name}-${option.value}`
-          return (
-            <div key={option.value} className="flex items-center gap-2">
-              <RadioGroupItem id={id} value={option.value} />
-              <Label htmlFor={id} className="font-normal">
-                {option.label}
-              </Label>
-            </div>
-          )
-        })}
-      </RadioGroup>
-    </div>
-  )
-}
-
-function labelOf<T extends string>(options: SelectOption<T>[], value: T) {
-  return options.find((option) => option.value === value)?.label ?? ""
 }
 
 export function ModalControls({ state, onToggle, onChange }: ModalControlsProps) {
@@ -135,7 +57,7 @@ export function ModalControls({ state, onToggle, onChange }: ModalControlsProps)
   })
 
   const guide = (decisionKey: DecisionKey, label: string) => (
-    <DecisionGuide decisionKey={decisionKey} label={label} />
+    <DecisionGuide guide={decisionGuides[decisionKey]} label={label} />
   )
 
   return (
@@ -144,9 +66,11 @@ export function ModalControls({ state, onToggle, onChange }: ModalControlsProps)
       {closeControls.map((control) => (
         <div key={control.key} className="px-4 py-3">
           <ToggleRow
-            control={control}
+            id={`control-${control.key}`}
+            label={control.label}
+            description={control.description}
             checked={state[control.key]}
-            onToggle={onToggle}
+            onCheckedChange={() => onToggle(control.key)}
           />
           {guide(control.key, control.label)}
         </div>
@@ -190,9 +114,11 @@ export function ModalControls({ state, onToggle, onChange }: ModalControlsProps)
       {/* Long Content */}
       <div className="px-4 py-3">
         <ToggleRow
-          control={longContentControl}
+          id="control-longContent"
+          label={longContentControl.label}
+          description={longContentControl.description}
           checked={state.longContent}
-          onToggle={onToggle}
+          onCheckedChange={() => onToggle("longContent")}
         />
         {guide("longContent", longContentControl.label)}
       </div>
@@ -291,9 +217,11 @@ export function ModalControls({ state, onToggle, onChange }: ModalControlsProps)
 
           <div className="border-t border-border pt-3">
             <ToggleRow
-              control={loadingControl}
+              id="control-loading"
+              label={loadingControl.label}
+              description={loadingControl.description}
               checked={state.loading}
-              onToggle={onToggle}
+              onCheckedChange={() => onToggle("loading")}
             />
             {guide("loading", loadingControl.label)}
           </div>
