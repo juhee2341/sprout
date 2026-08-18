@@ -26,11 +26,13 @@ function makeToast(overrides: Partial<ToastInstance> = {}): ToastInstance {
 function renderPreview({
   state,
   toasts = [],
+  pendingCount = 0,
   onPush = noop,
   onDismiss = noop,
 }: {
   state?: Partial<ToastPlaygroundState>
   toasts?: ToastInstance[]
+  pendingCount?: number
   onPush?: () => void
   onDismiss?: (id: number) => void
 } = {}) {
@@ -38,6 +40,7 @@ function renderPreview({
     <ToastPreview
       state={{ ...initialToastState, ...state }}
       toasts={toasts}
+      pendingCount={pendingCount}
       onPush={onPush}
       onDismiss={onDismiss}
       onClear={noop}
@@ -134,6 +137,43 @@ describe("ToastPreview", () => {
     renderPreview({ toasts: [makeToast({ closeButton: false })] })
 
     expect(screen.queryByRole("button", { name: "닫기" })).not.toBeInTheDocument()
+  })
+
+  it("겹쳐 쌓기는 카드를 같은 자리에 포개고 최신 것을 맨 앞에 둔다", () => {
+    renderPreview({
+      state: { stackMode: "stack", position: "bottom-right" },
+      toasts: [
+        makeToast({ id: 1, title: "먼저" }),
+        makeToast({ id: 2, title: "나중" }),
+      ],
+    })
+
+    const [older, newer] = screen.getAllByRole("listitem")
+
+    // 둘 다 같은 그리드 칸을 쓴다
+    expect(newer).toHaveStyle({ gridArea: "1 / 1" })
+    // 최신 것은 밀리지 않고 맨 앞
+    expect(newer).toHaveStyle({ transform: "translateY(0px) scale(1)" })
+    expect(older.style.transform).toContain("translateY(-10px)")
+    expect(Number(older.style.zIndex)).toBeLessThan(Number(newer.style.zIndex))
+  })
+
+  it("나란히 쌓기는 겹침 스타일을 주지 않는다", () => {
+    renderPreview({
+      state: { stackMode: "list" },
+      toasts: [makeToast({ id: 1 }), makeToast({ id: 2 })],
+    })
+
+    for (const item of screen.getAllByRole("listitem")) {
+      expect(item.style.transform).toBe("")
+      expect(item.style.gridArea).toBe("")
+    }
+  })
+
+  it("대기 중인 토스트가 있으면 개수를 함께 알려준다", () => {
+    renderPreview({ toasts: [makeToast()], pendingCount: 2 })
+
+    expect(screen.getByText(/떠 있는 토스트 1개/)).toHaveTextContent("대기 2개")
   })
 
   it("여러 개가 떠 있으면 모두 렌더하고 개수를 알려준다", () => {

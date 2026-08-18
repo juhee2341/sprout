@@ -88,6 +88,47 @@ describe("ToastControls", () => {
     ).toBeInTheDocument()
   })
 
+  it("Stacking 을 고르면 onChange('stackMode', ...) 를 호출한다", async () => {
+    const onChange = jest.fn()
+    const { user } = render(
+      <ToastControls
+        state={initialToastState}
+        onToggle={noop}
+        onChange={onChange}
+      />
+    )
+
+    await user.click(screen.getByRole("radio", { name: "겹쳐 쌓기" }))
+
+    expect(onChange).toHaveBeenCalledWith("stackMode", "stack")
+  })
+
+  it("1개씩 차례로 모드에서는 Max Visible 을 숨긴다", () => {
+    const { rerender } = render(
+      <ToastControls
+        state={initialToastState}
+        onToggle={noop}
+        onChange={noop}
+      />
+    )
+
+    expect(
+      screen.getByRole("radiogroup", { name: "Max Visible" })
+    ).toBeInTheDocument()
+
+    rerender(
+      <ToastControls
+        state={{ ...initialToastState, stackMode: "queue" }}
+        onToggle={noop}
+        onChange={noop}
+      />
+    )
+
+    expect(
+      screen.queryByRole("radiogroup", { name: "Max Visible" })
+    ).not.toBeInTheDocument()
+  })
+
   it("고른 값에 맞는 판단 근거를 보여준다", async () => {
     const { user } = render(
       <ToastControls

@@ -5,6 +5,8 @@ import {
   toDurationMs,
   toVisibleLimit,
   useToastPlayground,
+  visibleToasts,
+  type ToastInstance,
 } from "./useToastPlayground"
 
 describe("useToastPlayground", () => {
@@ -64,6 +66,48 @@ describe("useToastPlayground", () => {
 
     act(() => result.current.clear())
     expect(result.current.toasts).toEqual([])
+  })
+
+  it("1개씩 차례로 모드는 버리지 않고 대기시킨다", () => {
+    const { result } = renderHook(() => useToastPlayground())
+
+    act(() => result.current.set("stackMode", "queue"))
+    act(() => result.current.set("title", "첫 번째"))
+    act(() => result.current.push())
+    act(() => result.current.set("title", "두 번째"))
+    act(() => result.current.push())
+
+    // 개수 제한으로 버리는 것과 달리 뒤에 세워 둔다
+    expect(result.current.toasts).toHaveLength(2)
+    expect(result.current.visible).toHaveLength(1)
+    expect(result.current.visible[0].title).toBe("첫 번째")
+    expect(result.current.pendingCount).toBe(1)
+  })
+
+  it("앞의 것을 닫으면 대기하던 토스트가 올라온다", () => {
+    const { result } = renderHook(() => useToastPlayground())
+
+    act(() => result.current.set("stackMode", "queue"))
+    act(() => result.current.set("title", "첫 번째"))
+    act(() => result.current.push())
+    act(() => result.current.set("title", "두 번째"))
+    act(() => result.current.push())
+    act(() => result.current.dismiss(result.current.visible[0].id))
+
+    expect(result.current.visible[0].title).toBe("두 번째")
+    expect(result.current.pendingCount).toBe(0)
+  })
+
+  it("visibleToasts 는 모드에 따라 보일 것을 고른다", () => {
+    const make = (id: number) => ({ id }) as ToastInstance
+    const toasts = [make(1), make(2), make(3), make(4)]
+
+    // 나란히·겹쳐 쌓기는 최신 것부터 개수만큼
+    expect(visibleToasts(toasts, "list", "3").map((t) => t.id)).toEqual([2, 3, 4])
+    expect(visibleToasts(toasts, "stack", "1").map((t) => t.id)).toEqual([4])
+    expect(visibleToasts(toasts, "list", "unlimited")).toHaveLength(4)
+    // 1개씩 차례로는 도착 순서대로 맨 앞 하나
+    expect(visibleToasts(toasts, "queue", "3").map((t) => t.id)).toEqual([1])
   })
 
   it("manual 은 자동으로 닫히지 않는 duration 으로 변환된다", () => {

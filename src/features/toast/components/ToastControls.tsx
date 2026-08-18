@@ -16,6 +16,7 @@ import type {
   ToastPlaygroundState,
   ToastPosition,
   ToastPriority,
+  ToastStackMode,
   ToastToggleKey,
   ToastTone,
 } from "../hooks/useToastPlayground"
@@ -27,6 +28,7 @@ import {
   maxVisibleOptions,
   positionOptions,
   priorityOptions,
+  stackModeOptions,
   toneOptions,
   type DecisionKey,
 } from "../toast.data"
@@ -146,20 +148,37 @@ export function ToastControls({
         {guide("closeButton", closeButtonControl.label)}
       </div>
 
-      {/* Max Visible */}
+      {/* Stacking */}
       <div className="px-4 py-3">
         <RadioField
-          name="maxVisible"
-          label="Max Visible"
-          value={state.maxVisible}
-          options={maxVisibleOptions}
-          onChange={(value: ToastMaxVisible) => onChange("maxVisible", value)}
+          name="stackMode"
+          label="Stacking"
+          value={state.stackMode}
+          options={stackModeOptions}
+          onChange={(value: ToastStackMode) => onChange("stackMode", value)}
         />
         {guide(
-          "maxVisible",
-          `Max Visible — ${labelOf(maxVisibleOptions, state.maxVisible)}`
+          "stackMode",
+          `Stacking — ${labelOf(stackModeOptions, state.stackMode)}`
         )}
       </div>
+
+      {/* Max Visible — 1개씩 차례로 보여줄 때는 정할 것이 없다 */}
+      {state.stackMode !== "queue" && (
+        <div className="px-4 py-3">
+          <RadioField
+            name="maxVisible"
+            label="Max Visible"
+            value={state.maxVisible}
+            options={maxVisibleOptions}
+            onChange={(value: ToastMaxVisible) => onChange("maxVisible", value)}
+          />
+          {guide(
+            "maxVisible",
+            `Max Visible — ${labelOf(maxVisibleOptions, state.maxVisible)}`
+          )}
+        </div>
+      )}
     </div>
   )
 }

@@ -7,6 +7,7 @@ import type {
   ToastMaxVisible,
   ToastPosition,
   ToastPriority,
+  ToastStackMode,
   ToastToggleKey,
   ToastTone,
 } from "./hooks/useToastPlayground"
@@ -48,6 +49,12 @@ export const actionOptions: SelectOption<ToastActionKind>[] = [
   { value: "retry", label: "다시 시도" },
 ]
 
+export const stackModeOptions: SelectOption<ToastStackMode>[] = [
+  { value: "list", label: "나란히 쌓기" },
+  { value: "stack", label: "겹쳐 쌓기" },
+  { value: "queue", label: "1개씩 차례로" },
+]
+
 export const maxVisibleOptions: SelectOption<ToastMaxVisible>[] = [
   { value: "1", label: "1개" },
   { value: "3", label: "3개" },
@@ -64,6 +71,8 @@ const WCAG_USE_OF_COLOR =
 const WCAG_TARGET_SIZE =
   "https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html"
 const RADIX_TOAST = "https://www.radix-ui.com/primitives/docs/components/toast"
+const MATERIAL_SNACKBAR =
+  "https://developer.android.com/reference/com/google/android/material/snackbar/Snackbar"
 
 export type DecisionKey =
   | "position"
@@ -71,6 +80,7 @@ export type DecisionKey =
   | "priority"
   | "tone"
   | "action"
+  | "stackMode"
   | "maxVisible"
   | "closeButton"
   | "content"
@@ -306,6 +316,60 @@ export const decisionGuides: Record<DecisionKey, DecisionGuide> = {
     ],
   },
 
+  stackMode: {
+    summary:
+      "여러 개가 한꺼번에 생겼을 때 나란히 놓을지, 겹칠지, 하나씩 차례로 보여줄지 정합니다.",
+    fits: [
+      "나란히 쌓기 — 각 알림이 서로 다른 일에 대한 것이고, 함께 봐야 의미가 있을 때",
+      "겹쳐 쌓기 — 알림이 잦은 화면. 최신 것만 온전히 보여주고 나머지는 “더 있다”는 신호로만 남깁니다",
+      "1개씩 차례로 — 하나하나가 반드시 읽혀야 할 때. 모바일처럼 폭이 좁은 화면",
+    ],
+    careful: [
+      "겹쳐 쌓기 — 뒤에 깔린 토스트의 버튼은 사실상 누를 수 없습니다. 액션 버튼과 함께 쓰면 최신 것 말고는 조작이 막힙니다",
+      "1개씩 차례로 — 대기열이 길어지면 마지막 알림은 한참 뒤에 뜹니다. 이미 화면을 떠난 작업의 알림이 뒤늦게 나타납니다",
+      "나란히 쌓기 — 개수 제한 없이 두면 화면 한쪽이 통째로 덮입니다",
+    ],
+    tradeOffs: [
+      {
+        label: "나란히 쌓기",
+        points: [
+          "모든 알림을 동시에 읽고 각각 조작할 수 있습니다",
+          "세로 공간을 그대로 먹습니다 — 개수 제한이 반드시 필요합니다",
+        ],
+      },
+      {
+        label: "겹쳐 쌓기",
+        points: [
+          "자리를 하나만 쓰면서도 “더 있다”를 보여줍니다",
+          "뒤쪽 내용은 읽을 수도 누를 수도 없어, 사실상 최신 것만 유효합니다",
+          "카드마다 다른 시간에 사라지면 겹침이 어긋나 보입니다",
+        ],
+      },
+      {
+        label: "1개씩 차례로",
+        points: [
+          "하나도 놓치지 않고 순서대로 전달됩니다",
+          "각 알림의 유지 시간이 더해져 전체가 길어집니다",
+        ],
+      },
+    ],
+    why: "이 선택의 진짜 질문은 배치가 아니라 **넘칠 때 무엇을 할 것인가**입니다. 나란히·겹쳐 쌓기는 넘친 알림을 버리고, 1개씩 차례로는 버리지 않고 기다리게 합니다. 그래서 알림 하나하나가 사라져도 되는 성격이면 앞의 둘이 맞고, 각각이 반드시 전달돼야 한다면 세 번째가 맞습니다 — 다만 그 경우 대기 시간이 길어지므로 “이건 토스트가 아니라 알림 목록이어야 하지 않나”를 함께 따져볼 지점입니다. 스크린 리더 입장에서는 세 방식이 거의 같다는 점도 기억하세요. 겹쳐서 안 보이는 토스트도 읽히고, 대기 중인 토스트는 아직 존재하지 않습니다.",
+    evidence: [
+      {
+        source: "Android Material — Snackbar",
+        detail:
+          "“Snackbars appear above all other elements on screen and only one can be displayed at a time.” 한 번에 하나만 띄우고, isShownOrQueued() 처럼 대기열을 전제로 한 API 를 둡니다.",
+        url: MATERIAL_SNACKBAR,
+      },
+      {
+        source: "Radix UI — Toast Viewport (설치된 타입 정의)",
+        detail:
+          "Viewport 는 ol(정렬 목록) 로 렌더됩니다. 겹쳐 보이게 만들어도 DOM 상으로는 순서 있는 목록이라, 보조기술에는 가려진 토스트까지 순서대로 전달됩니다.",
+        url: RADIX_TOAST,
+      },
+    ],
+  },
+
   maxVisible: {
     summary: "토스트를 동시에 몇 개까지 띄울지 정합니다.",
     fits: [
@@ -334,7 +398,7 @@ export const decisionGuides: Record<DecisionKey, DecisionGuide> = {
         ],
       },
     ],
-    why: "개수 제한은 사실 “알림이 폭주할 때 무엇을 버릴 것인가”를 정하는 규칙입니다. 오래된 것을 버리면 최신 상태가 남고, 새 것을 대기시키면 순서가 지켜집니다 — 둘 다 맞지만 사용자에게 보이는 결과는 정반대입니다. 다만 토스트가 폭주한다는 것 자체가 대개 설계 신호입니다. 같은 알림이 반복된다면 개수를 조절할 게 아니라 하나로 합치거나, 알림 센터처럼 사라지지 않는 자리로 옮겨야 합니다.",
+    why: "개수 제한은 사실 “알림이 폭주할 때 무엇을 버릴 것인가”를 정하는 규칙입니다. 이 Playground 는 오래된 것부터 버려 최신 상태를 남기는데, 버리는 대신 대기시키고 싶다면 그건 개수가 아니라 Stacking 을 “1개씩 차례로”로 바꾸는 결정입니다 — 둘 다 맞지만 사용자에게 보이는 결과는 정반대입니다. 다만 토스트가 폭주한다는 것 자체가 대개 설계 신호입니다. 같은 알림이 반복된다면 개수를 조절할 게 아니라 하나로 합치거나, 알림 센터처럼 사라지지 않는 자리로 옮겨야 합니다.",
     evidence: [
       {
         source: "W3C WAI-ARIA APG — Alert Pattern",

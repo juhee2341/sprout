@@ -15,6 +15,12 @@ import type {
   ToastTone,
 } from "../hooks/useToastPlayground"
 
+/** 겹쳐 쌓을 때 뒤로 밀리는 간격(px)과 축소 비율 */
+const STACK_OFFSET = 10
+const STACK_SCALE_STEP = 0.04
+/** 이보다 뒤에 있는 토스트는 가려져 보이지 않는다 */
+const STACK_MAX_DEPTH = 2
+
 const viewportClass: Record<ToastPosition, string> = {
   "top-right": "top-4 right-4",
   "top-center": "top-4 left-1/2 -translate-x-1/2",
@@ -61,16 +67,34 @@ const actionMeta: Record<
 function ToastItem({
   toast,
   onDismiss,
+  depth,
+  growsUpward,
 }: {
   toast: ToastInstance
   onDismiss: (id: number) => void
+  /** 겹쳐 쌓을 때의 깊이 — 0 이 맨 앞, null 이면 겹치지 않음 */
+  depth: number | null
+  /** 뒤쪽 카드가 위로 삐져나오는지(하단 배치) */
+  growsUpward: boolean
 }) {
   const tone = toneMeta[toast.tone]
   const ToneIcon = tone.icon
   const action = toast.action === "none" ? null : actionMeta[toast.action]
 
+  // 겹침 배치는 모든 카드를 같은 자리에 두고 뒤로 갈수록 밀어 넣는다.
+  const stackStyle =
+    depth === null
+      ? undefined
+      : {
+          gridArea: "1 / 1",
+          transform: `translateY(${(growsUpward ? -1 : 1) * depth * STACK_OFFSET}px) scale(${1 - depth * STACK_SCALE_STEP})`,
+          zIndex: 50 - depth,
+          opacity: depth > STACK_MAX_DEPTH ? 0 : 1,
+        }
+
   return (
     <Toast.Root
+      style={stackStyle}
       type={toast.priority}
       duration={toast.duration}
       open
@@ -121,16 +145,23 @@ function ToastItem({
 export function ToastPreview({
   state,
   toasts,
+  pendingCount = 0,
   onPush,
   onDismiss,
   onClear,
 }: {
   state: ToastPlaygroundState
+  /** 화면에 보일 토스트 (대기 중인 것은 제외) */
   toasts: ToastInstance[]
+  /** 뒤에서 차례를 기다리는 개수 */
+  pendingCount?: number
   onPush: () => void
   onDismiss: (id: number) => void
   onClear: () => void
 }) {
+  const isStack = state.stackMode === "stack"
+  const growsUpward = state.position.startsWith("bottom")
+
   return (
     <Toast.Provider label="알림" swipeDirection={swipeDirection[state.position]}>
       <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card">
@@ -143,18 +174,28 @@ export function ToastPreview({
           </Button>
           <span className="text-xs text-muted-foreground">
             떠 있는 토스트 {toasts.length}개
+            {pendingCount > 0 && ` · 대기 ${pendingCount}개`}
           </span>
         </div>
       </div>
 
-      {toasts.map((toast) => (
-        <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />
+      {toasts.map((toast, index) => (
+        <ToastItem
+          key={toast.id}
+          toast={toast}
+          onDismiss={onDismiss}
+          // 배열 끝이 가장 최신 — 겹칠 때 맨 앞에 온다
+          depth={isStack ? toasts.length - 1 - index : null}
+          growsUpward={growsUpward}
+        />
       ))}
 
       <Toast.Viewport
         label="알림 ({hotkey})"
         className={cn(
-          "fixed z-[60] flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2 outline-none",
+          "fixed z-[60] w-[min(24rem,calc(100vw-2rem))] outline-none",
+          // 겹침은 모든 카드를 같은 그리드 칸에 포갠다
+          isStack ? "grid" : "flex flex-col gap-2",
           viewportClass[state.position]
         )}
       />

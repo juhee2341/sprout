@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 
 export type ToastPosition =
   | "top-right"
@@ -14,6 +14,13 @@ export type ToastPriority = "background" | "foreground"
 export type ToastTone = "info" | "success" | "error"
 export type ToastActionKind = "none" | "undo" | "retry"
 export type ToastMaxVisible = "1" | "3" | "unlimited"
+/**
+ * 여러 개가 동시에 생겼을 때 보여주는 방식.
+ * - list: 세로로 나란히 쌓기
+ * - stack: 최신 것 뒤로 겹쳐 쌓기
+ * - queue: 한 번에 하나씩, 나머지는 대기
+ */
+export type ToastStackMode = "list" | "stack" | "queue"
 
 export interface ToastPlaygroundState {
   position: ToastPosition
@@ -21,6 +28,7 @@ export interface ToastPlaygroundState {
   priority: ToastPriority
   tone: ToastTone
   action: ToastActionKind
+  stackMode: ToastStackMode
   maxVisible: ToastMaxVisible
   /** 토스트마다 X 버튼 노출 */
   closeButton: boolean
@@ -56,6 +64,7 @@ export const initialToastState: ToastPlaygroundState = {
   priority: "background",
   tone: "info",
   action: "none",
+  stackMode: "list",
   maxVisible: "3",
   closeButton: true,
   title: "변경 사항을 저장했어요",
@@ -70,6 +79,21 @@ export function toDurationMs(duration: ToastDuration) {
 /** 동시에 띄울 수 있는 최대 개수 */
 export function toVisibleLimit(maxVisible: ToastMaxVisible) {
   return maxVisible === "unlimited" ? Infinity : Number(maxVisible)
+}
+
+/**
+ * 실제로 화면에 보이는 토스트를 고른다.
+ * queue 는 도착 순서대로 하나씩(FIFO), 나머지는 최신 것부터 개수만큼.
+ */
+export function visibleToasts(
+  toasts: ToastInstance[],
+  stackMode: ToastStackMode,
+  maxVisible: ToastMaxVisible
+) {
+  if (stackMode === "queue") return toasts.slice(0, 1)
+
+  const limit = toVisibleLimit(maxVisible)
+  return limit === Infinity ? toasts : toasts.slice(-limit)
 }
 
 /**
@@ -106,7 +130,9 @@ export function useToastPlayground() {
       closeButton: state.closeButton,
       duration: toDurationMs(state.duration),
     }
-    const limit = toVisibleLimit(state.maxVisible)
+    // queue 는 넘친 것을 버리지 않고 뒤에 세운다 — 버릴 것인가 기다리게 할 것인가.
+    const limit =
+      state.stackMode === "queue" ? Infinity : toVisibleLimit(state.maxVisible)
 
     setToasts((prev) => {
       const next = [...prev, instance]
@@ -120,5 +146,22 @@ export function useToastPlayground() {
 
   const clear = useCallback(() => setToasts([]), [])
 
-  return { state, toasts, toggle, set, push, dismiss, clear }
+  const visible = useMemo(
+    () => visibleToasts(toasts, state.stackMode, state.maxVisible),
+    [toasts, state.stackMode, state.maxVisible]
+  )
+
+  return {
+    state,
+    toasts,
+    /** 화면에 보이는 것 */
+    visible,
+    /** 뒤에서 차례를 기다리는 개수 */
+    pendingCount: toasts.length - visible.length,
+    toggle,
+    set,
+    push,
+    dismiss,
+    clear,
+  }
 }

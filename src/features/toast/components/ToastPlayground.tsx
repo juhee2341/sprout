@@ -7,7 +7,7 @@ import { ToastControls } from "./ToastControls"
 import { ToastPreview } from "./ToastPreview"
 
 export function ToastPlayground() {
-  const { state, toasts, toggle, set, push, dismiss, clear } =
+  const { state, visible, pendingCount, toggle, set, push, dismiss, clear } =
     useToastPlayground()
 
   return (
@@ -24,7 +24,8 @@ export function ToastPlayground() {
         <h2 className="text-sm font-medium text-muted-foreground">Preview</h2>
         <ToastPreview
           state={state}
-          toasts={toasts}
+          toasts={visible}
+          pendingCount={pendingCount}
           onPush={push}
           onDismiss={dismiss}
           onClear={clear}
