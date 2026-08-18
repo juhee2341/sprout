@@ -1,28 +1,20 @@
-const GITHUB_URL = "https://github.com/juhee2341/sprout"
-
-const stack = ["Next.js", "TypeScript", "Tailwind CSS"]
+import { GITHUB_URL } from "@/constants/site"
 
 export function Footer() {
   return (
-    <footer className="border-t border-border px-6 py-10">
-      <div className="mx-auto flex max-w-4xl flex-col items-center gap-3 text-sm text-muted-foreground sm:flex-row sm:justify-between">
-        <p>
-          제작 기술:{" "}
-          {stack.map((tech, i) => (
-            <span key={tech}>
-              <span className="font-medium text-foreground">{tech}</span>
-              {i < stack.length - 1 ? ", " : ""}
-            </span>
-          ))}
-        </p>
-
+    <footer className="border-t border-brand-line-soft">
+      <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between gap-4 px-14 py-8 font-mono text-[13px] text-brand-label">
+        <div className="flex items-center gap-2">
+          <span aria-hidden>🌱</span>
+          <span>sprout — {new Date().getFullYear()}</span>
+        </div>
         <a
           href={GITHUB_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium text-foreground underline-offset-4 hover:underline"
+          className="transition-colors hover:text-brand-fg focus-visible:text-brand-fg focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-brand-accent"
         >
-          GitHub
+          GitHub ↗
         </a>
       </div>
     </footer>

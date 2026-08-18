@@ -1,52 +1,34 @@
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { principles } from "@/constants/principles"
 
-const pillars = [
-  {
-    icon: "🧪",
-    title: "실험",
-    description: "UI 아이디어를 만들고 시험합니다.",
-  },
-  {
-    icon: "⚖️",
-    title: "비교",
-    description: "여러 접근 방식을 비교합니다.",
-  },
-  {
-    icon: "📖",
-    title: "기록",
-    description: "엔지니어링 결정을 기록합니다.",
-  },
-]
+import { SectionHeader } from "./SectionHeader"
 
 export function Why() {
   return (
-    <section id="why" className="px-6 py-20">
-      <div className="mx-auto flex max-w-4xl flex-col gap-10">
-        <h2 className="text-center text-3xl font-semibold tracking-tight">
-왜 Sprout인가
-        </h2>
+    <section
+      id="why"
+      aria-labelledby="why-title"
+      className="mx-auto w-full max-w-[1280px] px-14 pb-[120px]"
+    >
+      <SectionHeader
+        id="why-title"
+        title="왜 Sprout인가"
+        label={`${String(principles.length).padStart(2, "0")} principles`}
+      />
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          {pillars.map((pillar) => (
-            <Card key={pillar.title}>
-              <CardHeader className="gap-3">
-                <span className="text-3xl" aria-hidden>
-                  {pillar.icon}
-                </span>
-                <CardTitle className="text-lg">{pillar.title}</CardTitle>
-                <CardDescription className="text-base">
-                  {pillar.description}
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
+      {principles.map((principle, index) => (
+        <div
+          key={principle.title}
+          className="grid grid-cols-1 items-start gap-6 border-b border-brand-line-softer py-8 md:grid-cols-[80px_1fr_1.4fr]"
+        >
+          <span aria-hidden className="font-mono text-[14px] text-brand-accent">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <h3 className="text-[22px] font-semibold">{principle.title}</h3>
+          <p className="text-[16px] leading-[1.6] break-keep text-brand-desc">
+            {principle.description}
+          </p>
         </div>
-      </div>
+      ))}
     </section>
   )
 }

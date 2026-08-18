@@ -23,6 +23,39 @@
   --ring: oklch(0.708 0 0);
 }
 
+/*
+ * 랜딩(마케팅) 페이지 전용 토큰.
+ * 디자인 핸드오프의 다크 테마 값을 그대로 옮긴 것으로, 라이트/다크 전환 없이
+ * 항상 고정이다. 플레이그라운드 화면은 위의 shadcn 토큰을 계속 쓴다.
+ */
+:root {
+  --brand-bg: oklch(15% 0.012 155);
+  --brand-fg: oklch(96% 0.006 150);
+  /* 로드맵 행 이름 */
+  --brand-fg-row: oklch(94% 0.006 150);
+  /* 보조 CTA 텍스트 */
+  --brand-fg-cta: oklch(90% 0.006 150);
+  /* 본문·내비 */
+  --brand-muted: oklch(70% 0.012 150);
+  /* 원칙 설명 */
+  --brand-desc: oklch(68% 0.012 150);
+  /* 스택 목록 */
+  --brand-stack: oklch(60% 0.012 150);
+  /* 섹션 라벨·푸터, 완료 상태 */
+  --brand-label: oklch(55% 0.012 150);
+  /* 예정 상태 텍스트 */
+  --brand-dim: oklch(50% 0.012 150);
+  /* 예정 상태 점 */
+  --brand-dim-dot: oklch(38% 0.012 150);
+  --brand-accent: oklch(78% 0.17 148);
+
+  /* 구분선 3종 — 굵기는 모두 1px, 밝기로만 위계를 준다 */
+  --brand-line: oklch(30% 0.012 150);
+  --brand-line-soft: oklch(26% 0.012 150);
+  --brand-line-softer: oklch(24% 0.012 150);
+  --brand-cta-border: oklch(40% 0.012 150);
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: oklch(0.145 0 0);
@@ -47,8 +80,26 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-space-grotesk);
+  --font-mono: var(--font-ibm-plex-mono);
+
+  --animate-sway: sway 3.2s ease-in-out infinite;
+
+  --color-brand-bg: var(--brand-bg);
+  --color-brand-fg: var(--brand-fg);
+  --color-brand-fg-row: var(--brand-fg-row);
+  --color-brand-fg-cta: var(--brand-fg-cta);
+  --color-brand-muted: var(--brand-muted);
+  --color-brand-desc: var(--brand-desc);
+  --color-brand-stack: var(--brand-stack);
+  --color-brand-label: var(--brand-label);
+  --color-brand-dim: var(--brand-dim);
+  --color-brand-dim-dot: var(--brand-dim-dot);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-line: var(--brand-line);
+  --color-brand-line-soft: var(--brand-line-soft);
+  --color-brand-line-softer: var(--brand-line-softer);
+  --color-brand-cta-border: var(--brand-cta-border);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -79,4 +130,19 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* 헤더 새싹이 좌우로 흔들리는 장식 애니메이션 */
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+::selection {
+  background: oklch(75% 0.16 150 / 0.35);
 }

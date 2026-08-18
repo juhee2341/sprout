@@ -23,5 +23,19 @@ export const roadmap: RoadmapItem[] = [
     status: "in-progress",
     href: "/components/toast",
   },
+  { label: "버튼 플레이그라운드", status: "planned" },
+  { label: "컴포넌트 비교", status: "planned" },
   { label: "결정 로그", status: "planned" },
 ]
+
+export const statusLabel: Record<RoadmapStatus, string> = {
+  done: "완료",
+  "in-progress": "진행중",
+  planned: "예정",
+}
+
+/** 진행률 라벨 — "3 / 7 완료" */
+export function progressLabel(items: RoadmapItem[] = roadmap) {
+  const done = items.filter((item) => item.status === "done").length
+  return `${done} / ${items.length} 완료`
+}
